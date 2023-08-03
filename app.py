@@ -11,9 +11,9 @@ from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv(), override=True)
 
 
-os.environ["OPENAI_API_KEY"] = "f650da4938f14d2ea108f4444d9b7237"
+os.environ["OPENAI_API_KEY"] = "API_KEY"
 os.environ["OPENAI_API_TYPE"] = "azure"
-os.environ["OPENAI_API_BASE"] = "https://cog-openai-omg-lab-fc.openai.azure.com/"
+os.environ["OPENAI_API_BASE"] = "API_BASE"
 
 
 
