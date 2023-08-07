@@ -7,24 +7,26 @@ from langchain.chains import ConversationalRetrievalChain
 from langchain.document_loaders.csv_loader import CSVLoader
 from langchain.vectorstores import FAISS
 import tempfile
-from dotenv import load_dotenv, find_dotenv
-load_dotenv(find_dotenv(), override=True)
 
 
-os.environ["OPENAI_API_KEY"] = "API_KEY"
-os.environ["OPENAI_API_TYPE"] = "azure"
-os.environ["OPENAI_API_BASE"] = "API_BASE"
+OPENAI_API_TYPE="azure"
+OPENAI_API_VERSION="2023-05-15"
+OPENAI_API_BASE="https://cog-openai-omg-lab-fc.openai.azure.com/"
 
+from dotenv import load_dotenv
+#os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
+os.environ["OPENAI_API_TYPE"] = OPENAI_API_TYPE
+os.environ["OPENAI_API_VERSION"] = OPENAI_API_VERSION
+os.environ["OPENAI_API_BASE"] = OPENAI_API_BASE
 
+load_dotenv()
+OPENAI_API_KEY= os.getenv("OPENAI_API_KEY")
 
 user_api_key = st.sidebar.text_input(
     label="#### Your OpenAI API key 👇",
     placeholder="Paste your OpenAI Key here",
     type="password")
 
-# Set the OPENAI_API_KEY environment variable with the provided value
-if user_api_key:
-    os.environ["OPENAI_API_KEY"] = user_api_key
 
 uploaded_file = st.sidebar.file_uploader("upload", type="csv")
 
@@ -37,8 +39,6 @@ if uploaded_file :
     loader = CSVLoader(file_path=tmp_file_path, encoding="utf-8", csv_args={
                 'delimiter': ','})
     data = loader.load()
-
-
 st.write(data)
 
 #Cutting the CSV file and provide it to vectorstore (FAISS)
@@ -48,7 +48,11 @@ vectorstore = FAISS.from_documents(data, embeddings)
 
 #Adding the ConversationalRetrievalChain by providing the chat model and the vectorstore
 chain = ConversationalRetrievalChain.from_llm(
-llm = AzureChatOpenAI(deployment_name='gpt-35-turbo-omg-lab',model_name='gpt-35-turbo'),
+llm = AzureChatOpenAI(
+    deployment_name='gpt-35-turbo-omg-lab',
+    model_name='gpt-35-turbo',
+    temperature=0.1
+    ),
 retriever=vectorstore.as_retriever())
 
 #This function allows us to provide the user’s question and conversation history to ConversationalRetrievalChain to generate the chatbot’s response.
@@ -95,3 +99,4 @@ if st.session_state['generated']:
         for i in range(len(st.session_state['generated'])):
             message(st.session_state["past"][i], is_user=True, key=str(i) + '_user', avatar_style="big-smile")
             message(st.session_state["generated"][i], key=str(i), avatar_style="thumbs")
+
